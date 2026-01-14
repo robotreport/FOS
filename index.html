@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>விஞ்ஞான பீடம் - கழிவறை துப்புரவு அறிக்கை</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Latha', 'Mukta Malar', Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            direction: ltr;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .date-section {
+            text-align: right;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        input[type="number"] {
+            width: 70px;
+            padding: 5px;
+            text-align: center;
+        }
+        
+        .report-filter {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        select, button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .line-save-btn {
+            background-color: #6c757d;
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+        button#viewReportBtn {
+            background-color: #17a2b8;
+        }
+
+        .chart-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        #statusMessage {
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 4px;
+            min-height: 20px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .loading { background-color: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>விஞ்ஞான பீடம் (Faculty of Science)</h1>
+    <h2>கழிவறை துப்புரவு அறிக்கை</h2>
+
+    <div class="date-section">
+        இன்றைய திகதி: <span id="currentDate"></span>
+    </div>
+
+    <div id="statusMessage"></div>
+
+    <table id="cleaningTable">
+        <thead>
+            <tr>
+                <th>துறை / பிரிவு (Department)</th>
+                <th>மொத்தம் (Total)</th>
+                <th>பயன்பாட்டில்<br><small>(Usable)</small></th>
+                <th>துப்புரவு<br><small>(Cleaned)</small></th>
+                <th>செயல் (Action)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-dept="Dean's Office">
+                <td style="text-align: left;">பீடாதிபதி அலுவலகம் (Dean's Office)</td>
+                <td>2</td>
+                <td><input type="number" class="usable" value="2" onchange="updateChart()"></td>
+                <td><input type="number" class="cleaned" value="0" onchange="updateChart()"></td>
+                <td><button class="line-save-btn" onclick="saveLineData(this)">சேமி (Save)</button></td>
+            </tr>
+            <tr data-dept="Maths Dept.">
+                <td style="text-align: left;">கணிதத் துறை (Maths Dept.)</td>
+                <td>8</td>
+                <td><input type="number" class="usable" value="8" onchange="updateChart()"></td>
+                <td><input type="number" class="cleaned" value="0" onchange="updateChart()"></td>
+                <td><button class="line-save-btn" onclick="saveLineData(this)">சேமி (Save)</button></td>
+            </tr>
+            <tr data-dept="Fisheries">
+                <td style="text-align: left;">மீன்வளத் துறை (Fisheries)</td>
+                <td>2</td>
+                <td><input type="number" class="usable" value="2" onchange="updateChart()"></td>
+                <td><input type="number" class="cleaned" value="0" onchange="updateChart()"></td>
+                <td><button class="line-save-btn" onclick="saveLineData(this)">சேமி (Save)</button></td>
+            </tr>
+            <tr data-dept="Physics">
+                <td style="text-align: left;">பௌதிகவியல் துறை (Physics)</td>
+                <td>10</td>
+                <td><input type="number" class="usable" value="10" onchange="updateChart()"></td>
+                <td><input type="number" class="cleaned" value="0" onchange="updateChart()"></td>
+                <td><button class="line-save-btn" onclick="saveLineData(this)">சேமி (Save)</button></td>
+            </tr>
+            <tr data-dept="Computer Science">
+                <td style="text-align: left;">கணினி விஞ்ஞானத் துறை (Computer Science)</td>
+                <td>15</td>
+                <td><input type="number" class="usable" value="15" onchange="updateChart()"></td>
+                <td><input type="number" class="cleaned" value="0" onchange="updateChart()"></td>
+                <td><button class="line-save-btn" onclick="saveLineData(this)">சேமி (Save)</button></td>
+            </tr>
+            <tr data-dept="Zoology">
+                <td style="text-align: left;">விலங்கியல் துறை (Zoology)</td>
+                <td>13</td>
+                <td><input type="number" class="usable" value="13" onchange="updateChart()"></td>
+                <td><input type="number" class="cleaned" value="0" onchange="updateChart()"></td>
+                <td><button class="line-save-btn" onclick="saveLineData(this)">சேமி (Save)</button></td>
+            </tr>
+            <tr data-dept="Chemistry">
+                <td style="text-align: left;">இரசாயனவியல் துறை (Chemistry)</td>
+                <td>11</td>
+                <td><input type="number" class="usable" value="11" onchange="updateChart()"></td>
+                <td><input type="number" class="cleaned" value="0" onchange="updateChart()"></td>
+                <td><button class="line-save-btn" onclick="saveLineData(this)">சேமி (Save)</button></td>
+            </tr>
+            <tr data-dept="Botany">
+                <td style="text-align: left;">தாவரவியல் துறை (Botany)</td>
+                <td>12</td>
+                <td><input type="number" class="usable" value="12" onchange="updateChart()"></td>
+                <td><input type="number" class="cleaned" value="0" onchange="updateChart()"></td>
+                <td><button class="line-save-btn" onclick="saveLineData(this)">சேமி (Save)</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h3>மாதாந்த அறிக்கை (Monthly Report)</h3>
+    <div class="report-filter">
+        <div>
+            <label>துறை: </label>
+            <select id="reportPlace">
+                <option value="All">அனைத்தும் (All)</option>
+                <option value="Dean's Office">Dean's Office</option>
+                <option value="Maths Dept.">Maths Dept.</option>
+                <option value="Fisheries">Fisheries</option>
+                <option value="Physics">Physics</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Zoology">Zoology</option>
+                <option value="Chemistry">Chemistry</option>
+                <option value="Botany">Botany</option>
+            </select>
+        </div>
+        <div>
+            <label>மாதம்: </label>
+            <select id="reportMonth">
+                <option value="January">January</option>
+                <option value="February">February</option>
+                <option value="March">March</option>
+                <option value="April">April</option>
+                <option value="May">May</option>
+                <option value="June">June</option>
+                <option value="July">July</option>
+                <option value="August">August</option>
+                <option value="September">September</option>
+                <option value="October">October</option>
+                <option value="November">November</option>
+                <option value="December">December</option>
+            </select>
+        </div>
+        <button type="button" id="viewReportBtn">அறிக்கையைப் பார்</button>
+    </div>
+
+    <hr>
+    <h3>மாதாந்த சுருக்கம் (Pie Chart)</h3>
+    <div class="chart-container">
+        <canvas id="cleaningChart"></canvas>
+    </div>
+</div>
+
+<hr>
+<h3 id="reportTitle">தினசரி அறிக்கை (Daily Report Table)</h3>
+<div id="reportTableContainer" style="overflow-x:auto;">
+    <table id="detailedReportTable">
+        <thead>
+            <tr>
+                <th>திகதி (Date)</th>
+                <th>மொத்தம் (Total)</th>
+                <th>பயன்பாட்டில் (Usable)</th>
+                <th>துப்புரவு (Cleaned)</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+</div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs, Timestamp, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAtT-NogTLEajQLl6qrSDuIyV8ttq2yep0",
+        authDomain: "faculty-of-science-91f62.firebaseapp.com",
+        projectId: "faculty-of-science-91f62",
+        storageBucket: "faculty-of-science-91f62.firebasestorage.app",
+        messagingSenderId: "656701614150",
+        appId: "1:656701614150:web:770bb3c43bada4f6690247"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.showStatus = function(msg, type) {
+        const el = document.getElementById('statusMessage');
+        el.innerText = msg;
+        el.className = type;
+        setTimeout(() => { el.innerText = ''; el.className = ''; }, 5000);
+    }
+
+    // --- SAVE SINGLE LINE DATA ---
+    window.saveLineData = async function(btn) {
+        const row = btn.closest('tr');
+        const dept = row.getAttribute('data-dept');
+        const usable = Number(row.querySelector('.usable').value);
+        const cleaned = Number(row.querySelector('.cleaned').value);
+
+        showStatus(`${dept} சேமிக்கப்படுகிறது...`, "loading");
+
+        try {
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+            const monthName = today.toLocaleString('default', { month: 'long' });
+            const yearStr = today.getFullYear().toString();
+
+            const q = query(collection(db, "cleaning_reports"), where("date", "==", dateStr));
+            const querySnapshot = await getDocs(q);
+
+            let allDetails = [];
+            let docId = null;
+
+            if (!querySnapshot.empty) {
+                // If today's document exists, get its details array
+                const existingDoc = querySnapshot.docs[0];
+                docId = existingDoc.id;
+                allDetails = existingDoc.data().details || [];
+            }
+
+            // Update specific department if it exists in the array, else push new
+            const deptIndex = allDetails.findIndex(item => item.dept === dept);
+            if (deptIndex > -1) {
+                allDetails[deptIndex] = { dept, usable, cleaned };
+            } else {
+                allDetails.push({ dept, usable, cleaned });
+            }
+
+            const finalDocData = {
+                date: dateStr,
+                month: monthName,
+                year: yearStr,
+                timestamp: Timestamp.now(),
+                details: allDetails
+            };
+
+            if (docId) {
+                await setDoc(doc(db, "cleaning_reports", docId), finalDocData, { merge: true });
+                showStatus(`${dept} இற்றைப்படுத்தப்பட்டது! (Updated)`, "success");
+            } else {
+                await addDoc(collection(db, "cleaning_reports"), finalDocData);
+                showStatus(`${dept} சேமிக்கப்பட்டது! (Saved)`, "success");
+            }
+        } catch (error) {
+            console.error("Error saving line:", error);
+            showStatus("பிழை ஏற்பட்டது", "error");
+        }
+    }
+
+   // --- UPDATED VIEW REPORT FUNCTION WITH TABLE ---
+document.getElementById('viewReportBtn').addEventListener('click', async () => {
+    const selectedMonth = document.getElementById('reportMonth').value;
+    const selectedPlace = document.getElementById('reportPlace').value;
+    const currentYear = new Date().getFullYear().toString();
+    const tableBody = document.querySelector('#detailedReportTable tbody');
+    
+    tableBody.innerHTML = ""; // Clear existing table rows
+    showStatus("தரவு பெறப்படுகிறது...", "loading");
+
+    try {
+        const q = query(
+            collection(db, "cleaning_reports"), 
+            where("month", "==", selectedMonth), 
+            where("year", "==", currentYear)
+        );
+
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+            showStatus("தரவுகள் இல்லை", "error");
+            window.initChart(0, 0);
+            return;
+        }
+
+        let totalUsableSum = 0;
+        let totalCleanedSum = 0;
+        let foundData = [];
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            let dayUsable = 0;
+            let dayCleaned = 0;
+            let dayTotal = 0;
+
+            data.details.forEach(item => {
+                if (selectedPlace === "All" || item.dept === selectedPlace) {
+                    dayUsable += item.usable;
+                    dayCleaned += item.cleaned;
+                    // Note: 'Total' isn't explicitly stored per row in your DB, 
+                    // we calculate it here based on your table logic
+                    dayTotal += (item.dept === "Dean's Office" || item.dept === "Fisheries") ? 2 : 
+                                (item.dept === "Maths Dept.") ? 8 :
+                                (item.dept === "Physics") ? 10 :
+                                (item.dept === "Computer Science") ? 15 :
+                                (item.dept === "Zoology") ? 13 :
+                                (item.dept === "Chemistry") ? 11 : 12; // Botany
+                }
+            });
+
+            if (dayUsable > 0 || dayCleaned > 0) {
+                foundData.push({
+                    date: data.date,
+                    total: dayTotal,
+                    usable: dayUsable,
+                    cleaned: dayCleaned
+                });
+                totalUsableSum += dayUsable;
+                totalCleanedSum += dayCleaned;
+            }
+        });
+
+        // Sort data by date
+        foundData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        // Populate Table
+        foundData.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.date}</td>
+                <td>${row.total}</td>
+                <td>${row.usable}</td>
+                <td>${row.cleaned}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+
+        window.initChart(totalUsableSum, totalCleanedSum);
+        showStatus(`அறிக்கை ஏற்றப்பட்டது: ${selectedMonth}`, "success");
+    } catch (error) {
+        console.error(error);
+        showStatus("தரவு பெறுவதில் பிழை", "error");
+    }
+});
+</script>
+
+<script>
+    const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString('ta-LK', dateOptions);
+
+    let myChart = null;
+
+    window.initChart = function(totalUsable, totalCleaned) {
+        const ctx = document.getElementById('cleaningChart').getContext('2d');
+        let notCleaned = Math.max(0, totalUsable - totalCleaned); 
+
+        const data = {
+            labels: ['சுத்தம் செய்யப்பட்டது', 'சுத்தம் செய்யப்படவில்லை'],
+            datasets: [{
+                data: [totalCleaned, notCleaned],
+                backgroundColor: ['#28a745', '#dc3545'],
+                hoverOffset: 4
+            }]
+        };
+
+        if (myChart) myChart.destroy(); 
+        myChart = new Chart(ctx, {
+            type: 'pie',
+            data: data,
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+
+    window.updateChart = function() {
+        let rows = document.querySelectorAll('#cleaningTable tbody tr');
+        let totalUsable = 0;
+        let totalCleaned = 0;
+
+        rows.forEach(row => {
+            let usableInput = row.querySelector('.usable');
+            let cleanedInput = row.querySelector('.cleaned');
+            let usableVal = Number(usableInput.value) || 0;
+            let cleanedVal = Number(cleanedInput.value) || 0;
+
+            if (cleanedVal > usableVal) {
+                alert("பிழை: சுத்தம் செய்யப்பட்ட எண்ணிக்கை அதிகமாக இருக்க முடியாது!");
+                cleanedInput.value = usableVal;
+                cleanedVal = usableVal;
+                cleanedInput.style.backgroundColor = "#ffcccc";
+            } else {
+                cleanedInput.style.backgroundColor = "";
+            }
+            totalUsable += usableVal;
+            totalCleaned += cleanedVal;
+        });
+        window.initChart(totalUsable, totalCleaned);
+    }
+
+    updateChart();
+</script>
+
+</body>
+</html>
