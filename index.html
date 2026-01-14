@@ -6,7 +6,7 @@
     <title>விஞ்ஞான பீடம் - கழிவறை துப்புரவு அறிக்கை</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <style>
+ <style>
         body {
             font-family: 'Latha', 'Mukta Malar', Arial, sans-serif;
             background-color: #f4f4f9;
@@ -33,10 +33,12 @@
             color: #555;
         }
         
+        /* Added block display and overflow for table responsiveness */
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 30px;
+            display: table; /* Default */
         }
         th, td {
             border: 1px solid #ddd;
@@ -109,6 +111,40 @@
         .success { background-color: #d4edda; color: #155724; }
         .error { background-color: #f8d7da; color: #721c24; }
         .loading { background-color: #fff3cd; color: #856404; }
+
+        /* --- MOBILE RESPONSIVE UPDATES --- */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 15px;
+            }
+            .report-filter {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .report-filter div {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            select, button {
+                width: 100%;
+                margin: 5px 0;
+                box-sizing: border-box;
+            }
+            /* Ensures large tables don't break the layout */
+            #cleaningTable {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            .date-section {
+                text-align: center;
+            }
+            h1 { font-size: 1.4rem; }
+            h2 { font-size: 1.1rem; }
+        }
     </style>
 </head>
 <body>
